@@ -61,27 +61,25 @@ func doMap(
 	if err != nil {
 		log.Fatal(err)
 	}
-	contents := string(buf)
 
-	keyValueRes := mapF(inFile, contents)
+	keyValueRes := mapF(inFile, string(buf))
 
 	for i := 0; i < nReduce; i++ {
 		f, err := os.Create(reduceName(jobName, mapTask, i))
 		if err != nil {
 			log.Fatal(err)
 		}
-		f.Close()
-	}
-	for _, pair := range keyValueRes {
-		b, err := json.Marshal(pair)
-		if err != nil {
-			log.Fatal(err)
-		}
-		taskR := ihash(pair.Key) % nReduce
-		reduceFN := reduceName(jobName, mapTask, taskR)
-		err1 := ioutil.WriteFile(reduceFN, b, 0644)
-		if err1 != nil {
-			log.Fatal(err1)
+		defer f.Close()
+
+		enc := json.NewEncoder(f)
+		for _, pair := range keyValueRes {
+			j := ihash(pair.Key) % nReduce
+			if i == j {
+				err := enc.Encode(&pair)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
 		}
 	}
 }

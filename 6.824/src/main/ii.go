@@ -15,11 +15,12 @@ import (
 // key/value pairs, each represented by a mapreduce.KeyValue.
 func mapF(document string, value string) (res []mapreduce.KeyValue) {
 	// Your code here (Part V).
-	content := strings.FieldsFunc(value, ifLetter)
-	for _, r := range content {
-		temp := mapreduce.KeyValue{string(r), document}
-		if !contains(res, temp) {
-			res = append(res, temp)
+
+	contentArr := strings.FieldsFunc(value, ifLetter)
+	for _, val := range contentArr {
+		tmp := mapreduce.KeyValue{val, document}
+		if !contains(res, tmp) {
+					res = append(res, mapreduce.KeyValue{val, document})
 		}
 	}
 	return res
